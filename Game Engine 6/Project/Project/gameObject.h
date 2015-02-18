@@ -10,6 +10,7 @@
 #include <string>
 
 #include "Mesh.h"
+#include "boundingBox.h"
 
 class gameObject
 {
@@ -22,6 +23,10 @@ private:
 	glm::mat4 transform; //the transformation matrix for the object
 	GLuint vboHandle[3]; //the three vbo IDs for the position and UV vbo handle and normal handle
 	GLuint vaoHandle; //the ID for the vao
+	
+
+	void setMinMax(); //set the min and max bounding box points
+
 public:
 	gameObject(); //create an object within the game
 	gameObject(mesh Mesh, glm::vec3 color, std::string shaderName, glm::vec3 Position); //create an object with a mesh, color, shader and position
@@ -33,6 +38,11 @@ public:
 	std::string getTextureName(); //return the name of the objects texture
 	glm::mat4 getTransformMatrix(); //return the transform matrix for the object
 	void scale(glm::vec3 scale); //scale the object
+
+	glm::vec3 getPosition();
+	void setPosition(glm::vec3 position);
+
+	boundingBox bb;
 
 };
 #endif

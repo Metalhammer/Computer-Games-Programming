@@ -1,28 +1,5 @@
-﻿  stdafx.cpp
-  texture.cpp
-  shader.cpp
-  ResourceManager.cpp
-c:\users\alex\documents\github\game-engine-coursework\game engine 6\project\project\resourcemanager.cpp(73): warning C4244: 'argument' : conversion from 'float' to 'unsigned int', possible loss of data
-c:\users\alex\documents\github\game-engine-coursework\game engine 6\project\project\resourcemanager.cpp(75): warning C4244: 'argument' : conversion from 'float' to 'unsigned int', possible loss of data
-c:\users\alex\documents\github\game-engine-coursework\game engine 6\project\project\resourcemanager.cpp(77): warning C4244: 'argument' : conversion from 'float' to 'unsigned int', possible loss of data
-c:\users\alex\documents\github\game-engine-coursework\game engine 6\project\project\resourcemanager.cpp(99): warning C4018: '<' : signed/unsigned mismatch
-  Project.cpp
-c:\users\alex\documents\github\game-engine-coursework\game engine 6\project\project\project.cpp(36): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-c:\users\alex\documents\github\game-engine-coursework\game engine 6\project\project\project.cpp(57): warning C4305: 'argument' : truncation from 'double' to 'float'
-c:\users\alex\documents\github\game-engine-coursework\game engine 6\project\project\project.cpp(62): warning C4305: 'argument' : truncation from 'double' to 'float'
-c:\users\alex\documents\github\game-engine-coursework\game engine 6\project\project\project.cpp(68): warning C4305: 'argument' : truncation from 'double' to 'float'
-c:\users\alex\documents\github\game-engine-coursework\game engine 6\project\project\project.cpp(74): warning C4305: 'argument' : truncation from 'double' to 'float'
-c:\users\alex\documents\github\game-engine-coursework\game engine 6\project\project\project.cpp(80): warning C4305: 'argument' : truncation from 'double' to 'float'
-c:\users\alex\documents\github\game-engine-coursework\game engine 6\project\project\project.cpp(157): warning C4018: '<' : signed/unsigned mismatch
-c:\users\alex\documents\github\game-engine-coursework\game engine 6\project\project\project.cpp(434): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-c:\users\alex\documents\github\game-engine-coursework\game engine 6\project\project\project.cpp(461): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-  Mesh.cpp
-  gl_core_4_3.cpp
-  gameObject.cpp
-  camera.cpp
-c:\users\alex\documents\github\game-engine-coursework\game engine 6\project\project\camera.cpp(137): warning C4305: 'initializing' : truncation from 'double' to 'float'
-  GLM: perspective function taking degrees as a parameter is deprecated. #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
-  GLM: rotate function taking degrees as a parameter is deprecated. #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
+﻿  collisions.cpp
+  boundingBox.cpp
   Generating Code...
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-  Project.vcxproj -> C:\Users\Alex\Documents\GitHub\Game-Engine-Coursework\Game Engine 6\Project\Debug\Project.exe
+  Project.vcxproj -> C:\Users\Alex\Documents\GitHub\Game-Engine-Coursework\Computer-Games-Programming\Game Engine 6\Project\Debug\Project.exe

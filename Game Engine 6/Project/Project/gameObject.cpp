@@ -13,6 +13,7 @@ gameObject::gameObject(mesh Mesh, std::string textureName, std::string shaderNam
 	this->position = Position; //set the current position of the object within the world
 	transform = glm::translate(glm::mat4(1.0f), glm::vec3(position)); //set up the transform matrix
 	createVAO(Mesh); //create the vao for the object when it is created
+	setMinMax();
 }
 
 gameObject::gameObject(mesh Mesh, glm::vec3 color, std::string shaderName, glm::vec3 Position)
@@ -23,6 +24,7 @@ gameObject::gameObject(mesh Mesh, glm::vec3 color, std::string shaderName, glm::
 	this->position = Position; //set the current position of the object within the world
 	transform = glm::translate(glm::mat4(1.0f), glm::vec3(position)); //set up the transform matrix
 	createVAO(Mesh); //create the vao for the object when it is created
+	setMinMax();
 }
 
 void gameObject::render()
@@ -87,4 +89,50 @@ glm::mat4 gameObject::getTransformMatrix()
 void gameObject::scale(glm::vec3 scale)
 {
 	transform = transform*glm::scale(scale);
+	bb.setMin(glm::vec3(bb.getMin().x * scale.x, bb.getMin().y * scale.y, bb.getMin().z * scale.z));
+	bb.setMax(glm::vec3(bb.getMax().x * scale.x, bb.getMax().y * scale.y, bb.getMax().z * scale.z));
+}
+
+void gameObject::setMinMax()
+{
+	glm::vec3 min;
+	glm::vec3 max;
+	bool first = true;
+
+	for(int i = 0; i < Mesh->getVertices().size(); i++)
+	{
+		if(first == true)
+		{
+			min = Mesh->getVertices().at(i);
+			max = Mesh->getVertices().at(i);
+			first = false;
+		}
+
+		if(Mesh->getVertices().at(i).x < min.x)
+			min.x = Mesh->getVertices().at(i).x;
+		if(Mesh->getVertices().at(i).y < min.y)
+			min.y = Mesh->getVertices().at(i).y;
+		if(Mesh->getVertices().at(i).z < min.z)
+			min.z = Mesh->getVertices().at(i).z;
+
+		if(Mesh->getVertices().at(i).x > max.x)
+			max.x = Mesh->getVertices().at(i).x;
+		if(Mesh->getVertices().at(i).y > max.y)
+			max.y = Mesh->getVertices().at(i).y;
+		if(Mesh->getVertices().at(i).z > max.z)
+			max.z = Mesh->getVertices().at(i).z;
+	}
+
+	bb.setMax(max);
+	bb.setMin(min);
+}
+
+glm::vec3 gameObject::getPosition()
+{
+	return position;
+}
+
+void gameObject::setPosition(glm::vec3 position)
+{
+	this->position = position;
 }

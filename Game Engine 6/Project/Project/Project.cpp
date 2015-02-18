@@ -12,6 +12,7 @@
 #include "gameObject.h"
 #include "camera.h"
 #include "Robot.h"
+#include "collisions.h"
 
 float gamemode;
 resourceManager RM;
@@ -22,6 +23,7 @@ camera Cam1(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0
 camera Cam2(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(0.0f,5.0f,-5.0f),glm::vec3(0.0f,0.0f,-1.0f)); //set up the camera
 bool cam1 = true; //is camera 1 being used
 bool loaded = false; //is the engine loaded
+collisions coll;
 
 
 //the current and old positions of the mouse
@@ -154,7 +156,7 @@ void render()
 	//clear color buffer before rendering
 	gl::Clear(gl::COLOR_BUFFER_BIT);
 	
-		for(int i=2; i<objects.size();i++)
+		for(int i=1; i<objects.size();i++)
 		{
 			RM.getTexture(objects[i].getTextureName()).useTexture(); //bind the texture for rendering
 			RM.getShader(objects[i].getShaderName()).useProgram(); //ready the shader for rendering
@@ -380,6 +382,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	gameObject block8(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(-17.0,7.0,-5.0));
 	gameObject block9(RM.getMesh("block"), "face.png", "shader", glm::vec3(17.0,7.0,-5.0));
 	gameObject block10(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(-22.0,9.0,5.0));
+	gameObject player(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(0.0,0.0,0.0));
 
 	block1.scale(glm::vec3(20,20,5));
 	block2.scale(glm::vec3(5,16,5));
@@ -396,7 +399,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	gameObject splash(RM.getMesh("window"), "Splash.png", "menuShader", glm::vec3(0.0,0.0,-10.0));
 	
 	objects.push_back(menu);
-	objects.push_back(splash);
+	objects.push_back(player);
 	objects.push_back(block1); //add the block to the objects vector for rendering
 	objects.push_back(block2); //add the block to the objects vector for rendering
 	objects.push_back(block3); //add the block to the objects vector for rendering
@@ -435,12 +438,24 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		if(glfwGetTime()-elapsedTime > 1/60)
 		{
+			glm::vec3 previousPosition = Cam1.getPosition();
 		//=====================
 		// MAIN LOOP GOES HERE
 		//=====================
 		input(); //get and proecss input
 		if(gamemode == 1)
 		{
+			player.setPosition(Cam1.getPosition());
+			//std::cout << player.getPosition().x << " " << player.getPosition().z << " " << Cam1.getPosition().x << " " << Cam1.getPosition().z <<std::endl;
+			
+			for(int i = 2; i < objects.size()-1; i ++)
+			{
+				if (coll.checkCollision(player,objects.at(i)) == true)
+				{
+					std::cout << "COLLISION " << i << std::endl;
+					Cam1.setPosition(previousPosition);
+				}
+			}
 			render(); //render all the objects
 		}
 		/*if(gamemode == 2)

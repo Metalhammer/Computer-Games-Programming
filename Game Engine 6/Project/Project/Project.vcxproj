@@ -84,7 +84,9 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="boundingBox.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="collisions.h" />
     <ClInclude Include="gameObject.h" />
     <ClInclude Include="gl_core_4_3.hpp" />
     <ClInclude Include="Mesh.h" />
@@ -96,7 +98,9 @@
     <ClInclude Include="texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="boundingBox.cpp" />
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="collisions.cpp" />
     <ClCompile Include="gameObject.cpp" />
     <ClCompile Include="gl_core_4_3.cpp" />
     <ClCompile Include="Mesh.cpp" />
