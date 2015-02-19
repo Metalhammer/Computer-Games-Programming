@@ -94,7 +94,8 @@ void camera::look(float x, float y, float sensitivity)
 
 void camera::forwards(float speedMod)
 {
-	forward = glm::vec3(forward.x,forward.y,forward.z); //keeps the camera from moving along the y axis
+	forward = glm::vec3(forward.x,0.0,forward.z); //keeps the camera from moving along the y axis
+	forward = glm::normalize(forward);
 	position += forward*speedMod; //move the camera along the forward vector by a small amount
 	//target += forward*speedMod; //move the target along the forward vector by a small amount
 	update(); //update the camera values
@@ -103,6 +104,7 @@ void camera::forwards(float speedMod)
 void camera::backwards(float speedMod)
 {
 	forward = glm::vec3(forward.x,0.0,forward.z);
+	forward = glm::normalize(forward);
 	position -= forward*speedMod; //move the camera back on the forward vector
 	//target -= forward*speedMod; //move the target back along the forard vector
 	update(); //update the camera values
@@ -111,6 +113,7 @@ void camera::backwards(float speedMod)
 void camera::strafeLeft(float speedMod)
 {
 	right = glm::vec3(right.x,0.0,right.z);
+
 	position += right*speedMod; //move the camera along the right vector
 	//target += right*speedMod; //move the target along the right vector
 	update(); //update the camera values

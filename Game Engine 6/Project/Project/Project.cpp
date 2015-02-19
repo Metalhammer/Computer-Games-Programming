@@ -20,7 +20,7 @@ resourceManager RM;
 GLFWwindow* window; // the render window
 glm::mat4 modelMatrix(1.0); //the model matrix used for rendering
 std::vector<gameObject> objects; //vector of objects in the game
-camera Cam1(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f)); //set up the camera
+camera Cam1(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(5.0f,0.0f,5.0f),glm::vec3(0.0f,0.0f,-1.0f)); //set up the camera
 camera Cam2(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(0.0f,5.0f,-5.0f),glm::vec3(0.0f,0.0f,-1.0f)); //set up the camera
 bool cam1 = true; //is camera 1 being used
 bool loaded = false; //is the engine loaded
@@ -169,7 +169,7 @@ void render()
 	//clear color buffer before rendering
 	gl::Clear(gl::COLOR_BUFFER_BIT);
 	
-		for(int i=1; i<objects.size();i++)
+		for(int i=2; i<objects.size();i++)
 		{
 			RM.getTexture(objects[i].getTextureName()).useTexture(); //bind the texture for rendering
 			RM.getShader(objects[i].getShaderName()).useProgram(); //ready the shader for rendering
@@ -385,7 +385,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//create objects to use
 	gameObject plane(RM.getMesh("plane"), "grass.png", "shader", glm::vec3(0.0,-1.0,0.0));
-	gameObject block1(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(0.0,9.0,5.0));
+	/*gameObject block1(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(0.0,9.0,5.0));
 	gameObject block2(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(7.0,7.0,-5.0));
 	gameObject block3(RM.getMesh("block"), "texture3.png", "shader", glm::vec3(-7.0,14.0,-5.0));
 	gameObject block4(RM.getMesh("block"), "face.png", "shader", glm::vec3(9.5,9.0,-15.0));
@@ -394,10 +394,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	gameObject block7(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(7.5,9.0,-37.0));
 	gameObject block8(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(-17.0,7.0,-5.0));
 	gameObject block9(RM.getMesh("block"), "face.png", "shader", glm::vec3(17.0,7.0,-5.0));
-	gameObject block10(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(-22.0,9.0,5.0));
-	gameObject player(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(0.0,0.0,0.0));
+	gameObject block10(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(-22.0,9.0,5.0));*/
 
-	block1.scale(glm::vec3(20,20,5));
+	
+
+	/*block1.scale(glm::vec3(20,20,5));
 	block2.scale(glm::vec3(5,16,5));
 	block3.scale(glm::vec3(5,30,5));
 	block4.scale(glm::vec3(10,20,10));
@@ -406,14 +407,18 @@ int _tmain(int argc, _TCHAR* argv[])
 	block7.scale(glm::vec3(20,20,10));
 	block8.scale(glm::vec3(10,16,5));
 	block9.scale(glm::vec3(10,16,5));
-	block10.scale(glm::vec3(20,20,5));
+	block10.scale(glm::vec3(20,20,5));*/
 
 	gameObject menu(RM.getMesh("window"), "Menu.png", "menuShader", glm::vec3(0.0,0.0,0.0));
 	gameObject splash(RM.getMesh("window"), "Splash.png", "menuShader", glm::vec3(0.0,0.0,-10.0));
 	
+
+	gameObject player(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(0.0,0.0,0.0));
+	
+
 	objects.push_back(menu);
 	objects.push_back(player);
-	objects.push_back(block1); //add the block to the objects vector for rendering
+	/*objects.push_back(block1); //add the block to the objects vector for rendering
 	objects.push_back(block2); //add the block to the objects vector for rendering
 	objects.push_back(block3); //add the block to the objects vector for rendering
 	objects.push_back(block4); //add the block to the objects vector for rendering
@@ -422,9 +427,45 @@ int _tmain(int argc, _TCHAR* argv[])
 	objects.push_back(block7); //add the block to the objects vector for rendering
 	objects.push_back(block8); //add the block to the objects vector for rendering
 	objects.push_back(block9); //add the block to the objects vector for rendering
-	objects.push_back(block10); //add the player to the objects vector for rendering
-	objects.push_back(plane); //create a plane for the world
+	objects.push_back(block10); //add the player to the objects vector for rendering*/
+	
 
+
+	/*for(int i = 0; i < 20; i++)
+	{
+		gameObject block(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(i*(1)+1,-0.5,0.0));
+		objects.push_back(block);
+
+		gameObject block2(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(i*(1)+1,0.5,0.0));
+		objects.push_back(block2);
+
+		gameObject block3(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(0.0,-0.5,i*(1)+1));
+		objects.push_back(block3);
+
+		gameObject block4(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(0.0,0.5,i*(1)+1));
+		objects.push_back(block4);
+
+		gameObject block5(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(i*(1)+1,-0.5,20.0));
+		objects.push_back(block5);
+
+		gameObject block6(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(i*(1)+1,0.5,20.0));
+		objects.push_back(block6);
+
+		gameObject block7(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(20.0,-0.5,i*(1)+1));
+		objects.push_back(block7);
+
+		gameObject block8(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(20.0,0.5,i*(1)+1));
+		objects.push_back(block8);
+	}*/
+
+	gameObject block1(RM.getMesh("block"), "texture3.png", "shader", glm::vec3(0,0.0,0.0));
+	block1.scale(glm::vec3(20,2,1));
+	objects.push_back(block1);
+
+	gameObject block2(RM.getMesh("block"), "texture3.png", "shader", glm::vec3(0,0.0,4.0));
+	block1.scale(glm::vec3(20,2,1));
+	objects.push_back(block2);
+	objects.push_back(plane); //create a plane for the world
 	gamemode = 2;
 
 	//=====================================================================================
