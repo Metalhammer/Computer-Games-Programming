@@ -15,8 +15,7 @@ class camera
 {
 private:
 	glm::vec3 position; //the position of the camera
-	glm::vec3 velocity;
-	glm::vec3 accel;
+	glm::vec3 velocity; 
 	glm::vec3 target; //the position in the world the camera is directed at
 	glm::vec3 up; //y axis relative to the camera
 	glm::vec3 right; //vector relative to the right of the camera
@@ -38,6 +37,7 @@ public:
 	camera(float FOV, float nearPlane, float farPlane, float aspect); //create a camera with fov, clipping planes and aspect ratio
 	camera(float FOV, float nearPlane, float farPlane, float aspect, glm::vec3 position, glm::vec3 target);//create a camera with fov, clipping planes, aspect ratio, position and target
 	void setPosition(glm::vec3 position); //sets the position of the camera
+	void setVelocity(glm::vec3 velocity);
 	void setTarget(glm::vec3 target); //sets the target of the camera
 	void update(); //update the position, target and up vector
 
@@ -57,5 +57,6 @@ public:
 	bool JUMPING_UP, JUMPING_DOWN, WALKING;
 
 	glm::vec3 getPosition(); //return the position of the camera
+	glm::vec3 getVelocity();
 };
 #endif

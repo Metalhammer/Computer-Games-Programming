@@ -13,6 +13,7 @@
 #include "camera.h"
 #include "Robot.h"
 #include "collisions.h"
+#include "moveable.h"
 
 float gamemode;
 resourceManager RM;
@@ -24,6 +25,7 @@ camera Cam2(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(0.0f,5.0f,-5.0f),glm::vec3(0.
 bool cam1 = true; //is camera 1 being used
 bool loaded = false; //is the engine loaded
 collisions coll;
+moveable move;
 
 
 //the current and old positions of the mouse
@@ -83,11 +85,14 @@ void input()
 		}
 
 		if (glfwGetKey(window,GLFW_KEY_SPACE)){
-			//if (Cam1.WALKING == true){
+			if (Cam1.WALKING == true){
 				//std::cout << "JUMP JUMP" << std::endl;
-				Cam1.JUMPING_UP = true; //std::cout << "JUMPING_UP" << std::endl;
+				glm::vec3 vel = Cam1.getVelocity();
+				vel.y = 20;
+				Cam1.setVelocity(vel);
+				Cam1.JUMPING_UP = true; std::cout << "JUMPING_UP" << std::endl;
 				Cam1.WALKING = false;
-			//}
+			}
 		}
 
 		//switch to camera 1
@@ -447,25 +452,30 @@ int _tmain(int argc, _TCHAR* argv[])
 		if(glfwGetTime()-elapsedTime > 1/60)
 		{
 
-			glm::vec3 cam(0.f,0.f,0.f);
-			cam = Cam1.getPosition();
+			//glm::vec3 cam(0.f,0.f,0.f);
+			//cam = Cam1.getPosition();
+
+			//if (Cam1.JUMPING_UP == true){
+			//	Cam1.setPosition(glm::vec3(cam.x,cam.y+0.1,cam.z));
+			//	if (cam.y > Cam1.MAX_JUMP) {
+			//		//std::cout << "Y: " << cam.y << std::endl;
+			//		Cam1.JUMPING_UP = false; 
+			//		Cam1.JUMPING_DOWN = true; //std::cout << "JUMPING_DOWN" << std::endl;
+			//	}
+			//}
+
+			//if (Cam1.JUMPING_DOWN == true){
+			//	Cam1.setPosition(glm::vec3(cam.x,cam.y-0.1,cam.z));
+			//	if (cam.y <= 0) {
+			//		Cam1.JUMPING_DOWN = false;
+			//		Cam1.WALKING = true; //std::cout << "WALKING" << std::endl;
+			//	}
+			//}
 
 			if (Cam1.JUMPING_UP == true){
-				Cam1.setPosition(glm::vec3(cam.x,cam.y+0.1,cam.z));
-				if (cam.y > Cam1.MAX_JUMP) {
-					//std::cout << "Y: " << cam.y << std::endl;
-					Cam1.JUMPING_UP = false; 
-					Cam1.JUMPING_DOWN = true; //std::cout << "JUMPING_DOWN" << std::endl;
-				}
+				move.euler(&Cam1);
 			}
-
-			if (Cam1.JUMPING_DOWN == true){
-				Cam1.setPosition(glm::vec3(cam.x,cam.y-0.1,cam.z));
-				if (cam.y <= 0) {
-					Cam1.JUMPING_DOWN = false;
-					Cam1.WALKING = true; //std::cout << "WALKING" << std::endl;
-				}
-			}
+				
 
 			
 

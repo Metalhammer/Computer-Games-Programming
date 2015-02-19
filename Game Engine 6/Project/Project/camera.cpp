@@ -12,6 +12,7 @@ camera::camera(float FOV, float nearPlane, float farPlane, float aspect)
 	JUMPING_DOWN = false;
 	WALKING = true;
 
+
 	MAX_JUMP = 2.f;
 }
 
@@ -36,6 +37,11 @@ camera::camera(float FOV, float nearPlane, float farPlane, float aspect, glm::ve
 void camera::setPosition(glm::vec3 position)
 {
 	this->position = position; //set the position of the camera
+}
+
+void camera::setVelocity(glm::vec3 velocity)
+{
+	this->velocity = velocity;
 }
 
 void camera::setTarget(glm::vec3 target)
@@ -126,6 +132,11 @@ glm::vec3 camera::getPosition()
 	return position;
 }
 
+glm::vec3 camera::getVelocity()
+{
+	return velocity;
+}
+
 void camera::rotate(float x, float y)
 {
 	pitch += y;
@@ -159,3 +170,4 @@ void camera::pan(float x, float y)
 	target = target + up*y;
 	update();
 }
+
