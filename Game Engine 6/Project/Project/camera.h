@@ -15,6 +15,8 @@ class camera
 {
 private:
 	glm::vec3 position; //the position of the camera
+	glm::vec3 velocity;
+	glm::vec3 accel;
 	glm::vec3 target; //the position in the world the camera is directed at
 	glm::vec3 up; //y axis relative to the camera
 	glm::vec3 right; //vector relative to the right of the camera
@@ -31,6 +33,7 @@ private:
 	float nearPlane; //the near clipping plane for the camera
 	float farPlane; //the far clipping plane for the camera
 	float aspect; //the aspect ratio for the camera
+
 public:
 	camera(float FOV, float nearPlane, float farPlane, float aspect); //create a camera with fov, clipping planes and aspect ratio
 	camera(float FOV, float nearPlane, float farPlane, float aspect, glm::vec3 position, glm::vec3 target);//create a camera with fov, clipping planes, aspect ratio, position and target
@@ -49,6 +52,9 @@ public:
 	void backwards(float speedMod); //move the camera backwards
 	void strafeLeft(float speedMod); //move the camera left
 	void strafeRight(float speedMod); //move the camera right
+
+	float MAX_JUMP;
+	bool JUMPING_UP, JUMPING_DOWN, WALKING;
 
 	glm::vec3 getPosition(); //return the position of the camera
 };

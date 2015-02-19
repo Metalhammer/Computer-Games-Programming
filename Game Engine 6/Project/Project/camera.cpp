@@ -8,6 +8,11 @@ camera::camera(float FOV, float nearPlane, float farPlane, float aspect)
 	this->farPlane = farPlane; //sets the far clipping plane
 	this->aspect = aspect; //sets the aspect ratio for the camera
 	projection = glm::perspective(FOV,aspect,nearPlane,farPlane); //sets the projection matrix for the camera
+	JUMPING_UP = false;
+	JUMPING_DOWN = false;
+	WALKING = true;
+
+	MAX_JUMP = 2.f;
 }
 
 camera::camera(float FOV, float nearPlane, float farPlane, float aspect, glm::vec3 position, glm::vec3 target)
@@ -20,6 +25,12 @@ camera::camera(float FOV, float nearPlane, float farPlane, float aspect, glm::ve
 	setTarget(target); //sets the target
 	update();
 	projection = glm::perspective(FOV,aspect,nearPlane,farPlane); //sets the projection matrix for the camera
+
+	JUMPING_UP = false;
+	JUMPING_DOWN = false;
+	WALKING = true;
+
+	MAX_JUMP = 2.f;
 }
 
 void camera::setPosition(glm::vec3 position)

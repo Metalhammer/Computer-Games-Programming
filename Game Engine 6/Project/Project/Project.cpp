@@ -82,6 +82,14 @@ void input()
 				Cam1.strafeRight(0.05);} //move right when D is pressed
 		}
 
+		if (glfwGetKey(window,GLFW_KEY_SPACE)){
+			//if (Cam1.WALKING == true){
+				//std::cout << "JUMP JUMP" << std::endl;
+				Cam1.JUMPING_UP = true; //std::cout << "JUMPING_UP" << std::endl;
+				Cam1.WALKING = false;
+			//}
+		}
+
 		//switch to camera 1
 		if (glfwGetKey(window,GLFW_KEY_1)){
 			if(cam1 ==true)
@@ -438,6 +446,33 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		if(glfwGetTime()-elapsedTime > 1/60)
 		{
+
+			glm::vec3 cam(0.f,0.f,0.f);
+			cam = Cam1.getPosition();
+
+			if (Cam1.JUMPING_UP == true){
+				Cam1.setPosition(glm::vec3(cam.x,cam.y+0.1,cam.z));
+				if (cam.y > Cam1.MAX_JUMP) {
+					//std::cout << "Y: " << cam.y << std::endl;
+					Cam1.JUMPING_UP = false; 
+					Cam1.JUMPING_DOWN = true; //std::cout << "JUMPING_DOWN" << std::endl;
+				}
+			}
+
+			if (Cam1.JUMPING_DOWN == true){
+				Cam1.setPosition(glm::vec3(cam.x,cam.y-0.1,cam.z));
+				if (cam.y <= 0) {
+					Cam1.JUMPING_DOWN = false;
+					Cam1.WALKING = true; //std::cout << "WALKING" << std::endl;
+				}
+			}
+
+			
+
+			/*if (Cam1.WALKING == true){
+				Cam1.setPosition(glm::vec3(cam.x,cam.y,cam.z));
+			}*/
+
 			glm::vec3 previousPosition = Cam1.getPosition();
 		//=====================
 		// MAIN LOOP GOES HERE
