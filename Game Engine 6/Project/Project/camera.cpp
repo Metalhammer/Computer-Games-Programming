@@ -1,6 +1,11 @@
 #include "stdafx.h"
 #include "camera.h"
 
+camera::camera()
+{
+
+}
+
 camera::camera(float FOV, float nearPlane, float farPlane, float aspect)
 {
 	this->FOV = FOV; //sets the camera FOV
@@ -8,12 +13,7 @@ camera::camera(float FOV, float nearPlane, float farPlane, float aspect)
 	this->farPlane = farPlane; //sets the far clipping plane
 	this->aspect = aspect; //sets the aspect ratio for the camera
 	projection = glm::perspective(FOV,aspect,nearPlane,farPlane); //sets the projection matrix for the camera
-	JUMPING_UP = false;
-	JUMPING_DOWN = false;
-	WALKING = true;
-
-
-	MAX_JUMP = 2.f;
+	canJump = true;
 }
 
 camera::camera(float FOV, float nearPlane, float farPlane, float aspect, glm::vec3 position, glm::vec3 target)
@@ -26,12 +26,7 @@ camera::camera(float FOV, float nearPlane, float farPlane, float aspect, glm::ve
 	setTarget(target); //sets the target
 	update();
 	projection = glm::perspective(FOV,aspect,nearPlane,farPlane); //sets the projection matrix for the camera
-
-	JUMPING_UP = false;
-	JUMPING_DOWN = false;
-	WALKING = true;
-
-	MAX_JUMP = 2.f;
+	canJump = true;
 }
 
 void camera::setPosition(glm::vec3 position)
@@ -95,7 +90,6 @@ void camera::look(float x, float y, float sensitivity)
 void camera::forwards(float speedMod)
 {
 	forward = glm::vec3(forward.x,0.0,forward.z); //keeps the camera from moving along the y axis
-	forward = glm::normalize(forward);
 	position += forward*speedMod; //move the camera along the forward vector by a small amount
 	//target += forward*speedMod; //move the target along the forward vector by a small amount
 	update(); //update the camera values
@@ -104,7 +98,6 @@ void camera::forwards(float speedMod)
 void camera::backwards(float speedMod)
 {
 	forward = glm::vec3(forward.x,0.0,forward.z);
-	forward = glm::normalize(forward);
 	position -= forward*speedMod; //move the camera back on the forward vector
 	//target -= forward*speedMod; //move the target back along the forard vector
 	update(); //update the camera values
@@ -113,7 +106,6 @@ void camera::backwards(float speedMod)
 void camera::strafeLeft(float speedMod)
 {
 	right = glm::vec3(right.x,0.0,right.z);
-
 	position += right*speedMod; //move the camera along the right vector
 	//target += right*speedMod; //move the target along the right vector
 	update(); //update the camera values
@@ -174,3 +166,27 @@ void camera::pan(float x, float y)
 	update();
 }
 
+void camera::setFOV(float fov)
+{
+	this->FOV = fov;
+}
+
+void camera::setNearPlane(float plane)
+{
+	this->nearPlane = plane;
+}
+
+void camera::setFarPlane(float plane)
+{
+	this->farPlane = plane;
+}
+
+void camera::setAspect(float aspect)
+{
+	this->aspect = aspect;
+}
+
+void camera::setProjection(float FOV, float aspect, float nearPlane, float farPlane)
+{
+	this->projection = glm::perspective(FOV,aspect,nearPlane,farPlane);
+}

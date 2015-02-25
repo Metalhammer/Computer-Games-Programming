@@ -22,10 +22,10 @@ void moveable::euler(camera *cam){
 	pos.y = newRY;
 
 	if (pos.y <= 0){
-		vel.y = 0;
-		pos.y = 0;
-		cam->JUMPING_UP = false;
-		cam->WALKING = true;
+	//	vel.y = 0;
+	//	pos.y = 0;
+	//	cam->JUMPING_UP = false;
+	//	cam->WALKING = true;
 	}
 
 	cam->setVelocity(vel);

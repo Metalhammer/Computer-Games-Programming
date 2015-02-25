@@ -14,7 +14,7 @@
 
 class gameObject
 {
-private:
+protected:
 	mesh *Mesh; //the mesh that is used for the object
 	std::string textureName; //the name of the texture for the object
 	std::string shaderName; //the name of the shader used to render the object

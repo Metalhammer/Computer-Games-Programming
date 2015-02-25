@@ -14,118 +14,65 @@
 #include "Robot.h"
 #include "collisions.h"
 #include "moveable.h"
+#include "player.h"
 
 float gamemode;
 resourceManager RM;
 GLFWwindow* window; // the render window
 glm::mat4 modelMatrix(1.0); //the model matrix used for rendering
 std::vector<gameObject> objects; //vector of objects in the game
-camera Cam1(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(5.0f,0.0f,5.0f),glm::vec3(0.0f,0.0f,-1.0f)); //set up the camera
-camera Cam2(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(0.0f,5.0f,-5.0f),glm::vec3(0.0f,0.0f,-1.0f)); //set up the camera
-bool cam1 = true; //is camera 1 being used
+//camera Cam1(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f)); //set up the camera
 bool loaded = false; //is the engine loaded
 collisions coll;
 moveable move;
-
+player player1;
 
 //the current and old positions of the mouse
 double posX,posY,oldX,oldY;
 
-void scroll_callback(GLFWwindow *window, double x, double y)
-{
-	//call back used when the mouse wheel is scrolled
-	//zoom the camera in
-	if(cam1 == false)
-	{
-	Cam2.zoom(y);
-	}
-}
-
 void input()
 {
-	
-		glfwGetCursorPos(window,&posX,&posY); //get the position of the cursor within the window
-		//get the difference between the old and current mouse position
-		float moveX = (float)(oldX - posX); 
-		float moveY = (float)(oldY - posY);
+	glfwGetCursorPos(window,&posX,&posY); //get the position of the cursor within the window
+	//get the difference between the old and current mouse position
+	float moveX = (float)(oldX - posX); 
+	float moveY = (float)(oldY - posY);
 
 	if(gamemode == 1) //if the game is playing, get input
 	{
 		//look around with the camea
-		if(cam1 ==true){
-		Cam1.look(moveX,moveY, 0.05f);}
+		player1.playerCam.look(moveX,moveY, 0.05f);
 
 		//move forwrds
 		if (glfwGetKey(window,GLFW_KEY_W)){
-			if(cam1 ==true){
-				Cam1.forwards(0.05);} //move forward when W is pressed
-		}
+		player1.playerCam.forwards(0.05);} //move forward when W is pressed
 
 		if (glfwGetKey(window,GLFW_KEY_W) && glfwGetKey(window,GLFW_KEY_LEFT_SHIFT)){
-			if(cam1 ==true){
-				Cam1.forwards(0.1);} //move forward when W is pressed
-		}
+				player1.playerCam.forwards(0.1);} //move forward when W is pressed
 
 		//move backwards
 		if (glfwGetKey(window,GLFW_KEY_S)){
-			if(cam1 ==true){
-				Cam1.backwards(0.05);} //move backward when S is pressed
-		}
+				player1.playerCam.backwards(0.05);} //move backward when S is pressed
 
 		//move left
 		if (glfwGetKey(window,GLFW_KEY_A)){
-			if(cam1 ==true){
-				Cam1.strafeLeft(0.05);} //move left when A is pressed
-		}
+				player1.playerCam.strafeLeft(0.05);} //move left when A is pressed
 
 		//move right
 		if (glfwGetKey(window,GLFW_KEY_D)){
-			if(cam1 ==true){
-				Cam1.strafeRight(0.05);} //move right when D is pressed
-		}
+				player1.playerCam.strafeRight(0.05);} //move right when D is pressed
 
 		if (glfwGetKey(window,GLFW_KEY_SPACE)){
-			if (Cam1.WALKING == true){
+			if (player1.getCanJump() == true){
 				//std::cout << "JUMP JUMP" << std::endl;
-				glm::vec3 vel = Cam1.getVelocity();
+				glm::vec3 vel = player1.playerCam.getVelocity();
 				vel.y = 20;
-				Cam1.setVelocity(vel);
-				Cam1.JUMPING_UP = true; std::cout << "JUMPING_UP" << std::endl;
-				Cam1.WALKING = false;
+				player1.playerCam.setVelocity(vel);
+				player1.setCanJump(false);
+
 			}
 		}
 
-		//switch to camera 1
-		if (glfwGetKey(window,GLFW_KEY_1)){
-			if(cam1 ==true)
-			{
-				cam1 = false;
-			}
-		}
-
-		//switch to camera 2
-		if (glfwGetKey(window,GLFW_KEY_2)){
-			if(cam1 ==false)
-			{
-				cam1 = true;
-			}
-		}
-
-		//pan the camera
-		if (glfwGetMouseButton(window,GLFW_MOUSE_BUTTON_RIGHT)){
-			if(cam1 ==true){}
-		else
-			Cam2.pan(moveX*0.01f,moveY*0.01f);
-		}
-
-		//rotate the camera
-		if (glfwGetMouseButton(window,GLFW_MOUSE_BUTTON_LEFT)){
-			if(cam1 ==true){}
-		else
-			Cam2.rotate(moveX*0.01f,moveY*0.01f);
-		}
-
-		//go to the menu
+	//go to the menu
 	if (glfwGetKey(window,GLFW_KEY_ESCAPE)){
 		gamemode = 3;
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
@@ -152,11 +99,9 @@ void input()
 			glfwTerminate();
 			exit(0);
 		}
-
 		}
 	}
-	
-	
+
 	//make the old position of the mouse the current position
 	oldX = posX;
 	oldY = posY;
@@ -169,7 +114,7 @@ void render()
 	//clear color buffer before rendering
 	gl::Clear(gl::COLOR_BUFFER_BIT);
 	
-		for(int i=2; i<objects.size();i++)
+		for(int i=1; i<objects.size();i++)
 		{
 			RM.getTexture(objects[i].getTextureName()).useTexture(); //bind the texture for rendering
 			RM.getShader(objects[i].getShaderName()).useProgram(); //ready the shader for rendering
@@ -180,55 +125,9 @@ void render()
 			GLuint viewMatrixID = gl::GetUniformLocation(RM.getShader(objects[i].getShaderName()).getProgramID(), "mView");
 			GLuint projectionMatrixID = gl::GetUniformLocation(RM.getShader(objects[i].getShaderName()).getProgramID(), "mProjection");
 
-			if(cam1 ==true)
-			{
 			gl::UniformMatrix4fv(modelMatrixID, 1, gl::FALSE_, &modelMatrix[0][0]);
-			gl::UniformMatrix4fv(viewMatrixID, 1, gl::FALSE_, &Cam1.getViewMatrix()[0][0]);
-			gl::UniformMatrix4fv(projectionMatrixID, 1, gl::FALSE_, &Cam1.getProjectionMatrix()[0][0]);
-			}
-
-			if(cam1 == false)
-			{
-			gl::UniformMatrix4fv(modelMatrixID, 1, gl::FALSE_, &modelMatrix[0][0]);
-			gl::UniformMatrix4fv(viewMatrixID, 1, gl::FALSE_, &Cam2.getViewMatrix()[0][0]);
-			gl::UniformMatrix4fv(projectionMatrixID, 1, gl::FALSE_, &Cam2.getProjectionMatrix()[0][0]);
-			}
-
-		//================================================
-		//LIGHTING
-		//================================================
-			/*
-		//set up light
-		//diffuse intensity
-		GLuint LD = gl::GetUniformLocation(RM.getShader(objects[i].getShaderName()).getProgramID(), "Ld");
-		gl::Uniform3f(LD,1.0f,1.0f,1.0f);
-		//Ambient intensity
-		GLuint LA = gl::GetUniformLocation(RM.getShader(objects[i].getShaderName()).getProgramID(), "La");
-		gl::Uniform3f(LA,0.0f,0.0f,0.0f);
-		//light position
-		GLuint Pos = gl::GetUniformLocation(RM.getShader(objects[i].getShaderName()).getProgramID(), "LightPos");
-		gl::Uniform3f(Pos,10.0f,10.0f,10.0f);
-
-		glm::mat4 MV = Cam1.getViewMatrix() * modelMatrix;
-		glm::mat3 mv = glm::mat3(glm::vec3(MV[0]),glm::vec3(MV[1]),glm::vec3(MV[2]));
-
-		GLuint NormMat = gl::GetUniformLocation(RM.getShader(objects[i].getShaderName()).getProgramID(), "NormalMatrix");
-		gl::UniformMatrix3fv( NormMat, 1, gl::FALSE_, &mv[0][0]);
-
-		//Set up blocks properties
-		//diffuse reflectivity
-		GLuint KD = gl::GetUniformLocation(RM.getShader(objects[i].getShaderName()).getProgramID(), "Kd");
-		gl::Uniform3f(KD,1.0f, 1.0f, 1.0f);
-		//ambient reflectvity
-		GLuint KA = gl::GetUniformLocation(RM.getShader(objects[i].getShaderName()).getProgramID(), "Ka");
-		gl::Uniform3f(KA,0.0f, 0.0f, 0.0f);
-		//specular reflectivity
-		GLuint KS = gl::GetUniformLocation(RM.getShader(objects[i].getShaderName()).getProgramID(), "Ks");
-		gl::Uniform3f(KS,1.0f, 1.0f, 1.0f);
-		//specular reflection exponent
-		int N = gl::GetUniformLocation(RM.getShader(objects[i].getShaderName()).getProgramID(), "n");
-		gl::Uniform1f(N,64);
-		*/
+			gl::UniformMatrix4fv(viewMatrixID, 1, gl::FALSE_, &player1.playerCam.getViewMatrix()[0][0]);
+			gl::UniformMatrix4fv(projectionMatrixID, 1, gl::FALSE_, &player1.playerCam.getProjectionMatrix()[0][0]);
 
 			//================================================
 			//RENDER
@@ -236,39 +135,6 @@ void render()
 			objects[i].render(); //render the object
 		}
 }
-
-/*void renderSplashScreen()
-{
-	//clear depth buffer before rendering
-	gl::Clear(gl::DEPTH_BUFFER_BIT);
-	//clear color buffer before rendering
-	gl::Clear(gl::COLOR_BUFFER_BIT);
-
-	RM.getTexture(objects[1].getTextureName()).useTexture(); //bind the texture for rendering
-	RM.getShader(objects[1].getShaderName()).useProgram(); //ready the shader for rendering
-	modelMatrix = objects[1].getTransformMatrix(); //set the model matrix for rendering
-
-	//set up the model, view and porjection matrix for use with the shader
-	GLuint modelMatrixID = gl::GetUniformLocation(RM.getShader(objects[1].getShaderName()).getProgramID(), "mModel");
-	GLuint viewMatrixID = gl::GetUniformLocation(RM.getShader(objects[1].getShaderName()).getProgramID(), "mView");
-	GLuint projectionMatrixID = gl::GetUniformLocation(RM.getShader(objects[1].getShaderName()).getProgramID(), "mProjection");
-
-	if(cam1 ==true)
-	{
-	gl::UniformMatrix4fv(modelMatrixID, 1, gl::FALSE_, &modelMatrix[0][0]);
-	gl::UniformMatrix4fv(viewMatrixID, 1, gl::FALSE_, &Cam1.getViewMatrix()[0][0]);
-	gl::UniformMatrix4fv(projectionMatrixID, 1, gl::FALSE_, &Cam1.getProjectionMatrix()[0][0]);
-	}
-
-	if(cam1 == false)
-	{
-	gl::UniformMatrix4fv(modelMatrixID, 1, gl::FALSE_, &modelMatrix[0][0]);
-	gl::UniformMatrix4fv(viewMatrixID, 1, gl::FALSE_, &Cam2.getViewMatrix()[0][0]);
-	gl::UniformMatrix4fv(projectionMatrixID, 1, gl::FALSE_, &Cam2.getProjectionMatrix()[0][0]);
-	}
-
-	objects[1].render();
-}*/
 
 void renderMenu()
 {
@@ -286,19 +152,10 @@ void renderMenu()
 	GLuint viewMatrixID = gl::GetUniformLocation(RM.getShader(objects[0].getShaderName()).getProgramID(), "mView");
 	GLuint projectionMatrixID = gl::GetUniformLocation(RM.getShader(objects[0].getShaderName()).getProgramID(), "mProjection");
 
-	if(cam1 ==true)
-	{
 	gl::UniformMatrix4fv(modelMatrixID, 1, gl::FALSE_, &modelMatrix[0][0]);
-	gl::UniformMatrix4fv(viewMatrixID, 1, gl::FALSE_, &Cam1.getViewMatrix()[0][0]);
-	gl::UniformMatrix4fv(projectionMatrixID, 1, gl::FALSE_, &Cam1.getProjectionMatrix()[0][0]);
-	}
+	gl::UniformMatrix4fv(viewMatrixID, 1, gl::FALSE_, &player1.playerCam.getViewMatrix()[0][0]);
+	gl::UniformMatrix4fv(projectionMatrixID, 1, gl::FALSE_, &player1.playerCam.getProjectionMatrix()[0][0]);
 
-	if(cam1 == false)
-	{
-	gl::UniformMatrix4fv(modelMatrixID, 1, gl::FALSE_, &modelMatrix[0][0]);
-	gl::UniformMatrix4fv(viewMatrixID, 1, gl::FALSE_, &Cam2.getViewMatrix()[0][0]);
-	gl::UniformMatrix4fv(projectionMatrixID, 1, gl::FALSE_, &Cam2.getProjectionMatrix()[0][0]);
-	}
 
 	objects[0].render();
 }
@@ -354,9 +211,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	//enable depth testing
 	gl::Enable(gl::DEPTH_TEST);
 	
-
-	glfwSetScrollCallback(window,scroll_callback);
-
 	//set the mouse current and old positions
 	oldX = 0.0;
 	oldY = 0.0;
@@ -385,7 +239,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//create objects to use
 	gameObject plane(RM.getMesh("plane"), "grass.png", "shader", glm::vec3(0.0,-1.0,0.0));
-	/*gameObject block1(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(0.0,9.0,5.0));
+	gameObject block1(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(0.0,-0.5,5.0));
 	gameObject block2(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(7.0,7.0,-5.0));
 	gameObject block3(RM.getMesh("block"), "texture3.png", "shader", glm::vec3(-7.0,14.0,-5.0));
 	gameObject block4(RM.getMesh("block"), "face.png", "shader", glm::vec3(9.5,9.0,-15.0));
@@ -394,11 +248,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	gameObject block7(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(7.5,9.0,-37.0));
 	gameObject block8(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(-17.0,7.0,-5.0));
 	gameObject block9(RM.getMesh("block"), "face.png", "shader", glm::vec3(17.0,7.0,-5.0));
-	gameObject block10(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(-22.0,9.0,5.0));*/
+	gameObject block10(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(-22.0,9.0,5.0));
 
-	
-
-	/*block1.scale(glm::vec3(20,20,5));
+	block1.scale(glm::vec3(20,1,5));
 	block2.scale(glm::vec3(5,16,5));
 	block3.scale(glm::vec3(5,30,5));
 	block4.scale(glm::vec3(10,20,10));
@@ -407,18 +259,13 @@ int _tmain(int argc, _TCHAR* argv[])
 	block7.scale(glm::vec3(20,20,10));
 	block8.scale(glm::vec3(10,16,5));
 	block9.scale(glm::vec3(10,16,5));
-	block10.scale(glm::vec3(20,20,5));*/
+	block10.scale(glm::vec3(20,20,5));
 
 	gameObject menu(RM.getMesh("window"), "Menu.png", "menuShader", glm::vec3(0.0,0.0,0.0));
 	gameObject splash(RM.getMesh("window"), "Splash.png", "menuShader", glm::vec3(0.0,0.0,-10.0));
 	
-
-	gameObject player(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(0.0,0.0,0.0));
-	
-
 	objects.push_back(menu);
-	objects.push_back(player);
-	/*objects.push_back(block1); //add the block to the objects vector for rendering
+	objects.push_back(block1); //add the block to the objects vector for rendering
 	objects.push_back(block2); //add the block to the objects vector for rendering
 	objects.push_back(block3); //add the block to the objects vector for rendering
 	objects.push_back(block4); //add the block to the objects vector for rendering
@@ -427,45 +274,12 @@ int _tmain(int argc, _TCHAR* argv[])
 	objects.push_back(block7); //add the block to the objects vector for rendering
 	objects.push_back(block8); //add the block to the objects vector for rendering
 	objects.push_back(block9); //add the block to the objects vector for rendering
-	objects.push_back(block10); //add the player to the objects vector for rendering*/
-	
-
-
-	/*for(int i = 0; i < 20; i++)
-	{
-		gameObject block(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(i*(1)+1,-0.5,0.0));
-		objects.push_back(block);
-
-		gameObject block2(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(i*(1)+1,0.5,0.0));
-		objects.push_back(block2);
-
-		gameObject block3(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(0.0,-0.5,i*(1)+1));
-		objects.push_back(block3);
-
-		gameObject block4(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(0.0,0.5,i*(1)+1));
-		objects.push_back(block4);
-
-		gameObject block5(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(i*(1)+1,-0.5,20.0));
-		objects.push_back(block5);
-
-		gameObject block6(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(i*(1)+1,0.5,20.0));
-		objects.push_back(block6);
-
-		gameObject block7(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(20.0,-0.5,i*(1)+1));
-		objects.push_back(block7);
-
-		gameObject block8(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(20.0,0.5,i*(1)+1));
-		objects.push_back(block8);
-	}*/
-
-	gameObject block1(RM.getMesh("block"), "texture3.png", "shader", glm::vec3(0,0.0,0.0));
-	block1.scale(glm::vec3(20,2,1));
-	objects.push_back(block1);
-
-	gameObject block2(RM.getMesh("block"), "texture3.png", "shader", glm::vec3(0,0.0,4.0));
-	block1.scale(glm::vec3(20,2,1));
-	objects.push_back(block2);
+	objects.push_back(block10); //add the player to the objects vector for rendering
 	objects.push_back(plane); //create a plane for the world
+
+	player1.setUpPlayerObject(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(0.0,0.0,5.0));
+	player1.setUpPlayerCamera(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f));
+
 	gamemode = 2;
 
 	//=====================================================================================
@@ -492,63 +306,46 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		if(glfwGetTime()-elapsedTime > 1/60)
 		{
-
-			//glm::vec3 cam(0.f,0.f,0.f);
-			//cam = Cam1.getPosition();
-
-			//if (Cam1.JUMPING_UP == true){
-			//	Cam1.setPosition(glm::vec3(cam.x,cam.y+0.1,cam.z));
-			//	if (cam.y > Cam1.MAX_JUMP) {
-			//		//std::cout << "Y: " << cam.y << std::endl;
-			//		Cam1.JUMPING_UP = false; 
-			//		Cam1.JUMPING_DOWN = true; //std::cout << "JUMPING_DOWN" << std::endl;
-			//	}
-			//}
-
-			//if (Cam1.JUMPING_DOWN == true){
-			//	Cam1.setPosition(glm::vec3(cam.x,cam.y-0.1,cam.z));
-			//	if (cam.y <= 0) {
-			//		Cam1.JUMPING_DOWN = false;
-			//		Cam1.WALKING = true; //std::cout << "WALKING" << std::endl;
-			//	}
-			//}
-
-			if (Cam1.JUMPING_UP == true){
-				move.euler(&Cam1);
-			}
-				
-
-			
-
-			/*if (Cam1.WALKING == true){
-				Cam1.setPosition(glm::vec3(cam.x,cam.y,cam.z));
-			}*/
-
-			glm::vec3 previousPosition = Cam1.getPosition();
 		//=====================
 		// MAIN LOOP GOES HERE
 		//=====================
-		input(); //get and proecss input
+		 //get and proecss input
+		glm::vec3 previousPosition = player1.playerCam.getPosition();
+		player1.setPosition(player1.playerCam.getPosition());
+		input();
+		player1.setPosition(player1.playerCam.getPosition());
 		if(gamemode == 1)
 		{
-			player.setPosition(Cam1.getPosition());
-			//std::cout << player.getPosition().x << " " << player.getPosition().z << " " << Cam1.getPosition().x << " " << Cam1.getPosition().z <<std::endl;
-			
-			for(int i = 2; i < objects.size()-1; i ++)
+			for(int i = 1; i < objects.size(); i ++)
 			{
-				if (coll.checkCollision(player,objects.at(i)) == true)
+				if (coll.checkCollision(player1,objects.at(i)) == true)
 				{
-					std::cout << "COLLISION " << i << std::endl;
-					Cam1.setPosition(previousPosition);
+					std::cout << "COLLISION XZ " << i << std::endl;
+					player1.playerCam.setPosition(previousPosition);
+					
+				}
+			}
+
+			//MOVE ALL THE TIME
+			move.euler(&player1.playerCam);
+			player1.setPosition(player1.playerCam.getPosition());
+			
+			for(int i = 1; i < objects.size(); i ++)
+			{
+				if (coll.checkCollision(player1,objects.at(i)) == true)
+				{
+					player1.setCanJump(true);
+					std::cout << "COLLISION Y " << i << std::endl;
+					float dif = objects.at(i).bb.getMax().y - player1.bb.getMin().y;
+					float height = (player1.bb.getMax().y - player1.bb.getMin().y)/2;
+					player1.playerCam.setPosition(glm::vec3(player1.playerCam.getPosition().x,previousPosition.y,player1.playerCam.getPosition().z));
+					player1.playerCam.setVelocity(glm::vec3(0,0,0));
+					player1.setPosition(player1.playerCam.getPosition());
 				}
 			}
 			render(); //render all the objects
 		}
-		/*if(gamemode == 2)
-		{
-			renderSplashScreen(); //render all the objects
-		}*/
-
+	
 		if(gamemode == 3)
 		{
 			renderMenu(); //render all the objects
@@ -561,11 +358,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		elapsedTime = glfwGetTime();
 		}
-
-
 	}
-
-	
 	//destroy window
 	glfwDestroyWindow(window);
 	//terminate glfw

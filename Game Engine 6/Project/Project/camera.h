@@ -33,7 +33,9 @@ private:
 	float farPlane; //the far clipping plane for the camera
 	float aspect; //the aspect ratio for the camera
 
+	
 public:
+	camera();
 	camera(float FOV, float nearPlane, float farPlane, float aspect); //create a camera with fov, clipping planes and aspect ratio
 	camera(float FOV, float nearPlane, float farPlane, float aspect, glm::vec3 position, glm::vec3 target);//create a camera with fov, clipping planes, aspect ratio, position and target
 	void setPosition(glm::vec3 position); //sets the position of the camera
@@ -53,10 +55,17 @@ public:
 	void strafeLeft(float speedMod); //move the camera left
 	void strafeRight(float speedMod); //move the camera right
 
-	float MAX_JUMP;
-	bool JUMPING_UP, JUMPING_DOWN, WALKING;
+	bool canJump;
 
 	glm::vec3 getPosition(); //return the position of the camera
 	glm::vec3 getVelocity();
+
+	void setFOV(float FOV);
+	void setNearPlane(float plane);
+	void setFarPlane(float plane);
+	void setAspect(float aspect);
+	void setProjection(float FOV, float aspect, float nearPlane, float farPlane);
+
+	
 };
 #endif
