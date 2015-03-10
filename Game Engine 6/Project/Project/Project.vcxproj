@@ -87,6 +87,7 @@
     <ClInclude Include="boundingBox.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="collisions.h" />
+    <ClInclude Include="enemy.h" />
     <ClInclude Include="gameObject.h" />
     <ClInclude Include="gl_core_4_3.hpp" />
     <ClInclude Include="Mesh.h" />
@@ -103,6 +104,7 @@
     <ClCompile Include="boundingBox.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="collisions.cpp" />
+    <ClCompile Include="enemy.cpp" />
     <ClCompile Include="gameObject.cpp" />
     <ClCompile Include="gl_core_4_3.cpp" />
     <ClCompile Include="Mesh.cpp" />

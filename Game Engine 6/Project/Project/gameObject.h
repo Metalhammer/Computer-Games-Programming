@@ -24,6 +24,7 @@ protected:
 	GLuint vboHandle[3]; //the three vbo IDs for the position and UV vbo handle and normal handle
 	GLuint vaoHandle; //the ID for the vao
 	
+	float velocity;
 
 	void setMinMax(); //set the min and max bounding box points
 
@@ -41,6 +42,8 @@ public:
 
 	glm::vec3 getPosition();
 	void setPosition(glm::vec3 position);
+
+	void chase(gameObject player);
 
 	boundingBox bb;
 

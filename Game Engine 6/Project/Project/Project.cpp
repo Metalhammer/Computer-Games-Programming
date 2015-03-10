@@ -15,6 +15,7 @@
 #include "collisions.h"
 #include "moveable.h"
 #include "player.h"
+#include "enemy.h"
 
 float gamemode;
 resourceManager RM;
@@ -26,6 +27,7 @@ bool loaded = false; //is the engine loaded
 collisions coll;
 moveable move;
 player player1;
+enemy enemy1;
 
 //the current and old positions of the mouse
 double posX,posY,oldX,oldY;
@@ -132,7 +134,9 @@ void render()
 			//================================================
 			//RENDER
 			//================================================
+			//enemy1.render();
 			objects[i].render(); //render the object
+			
 		}
 }
 
@@ -280,6 +284,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	player1.setUpPlayerObject(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(0.0,0.0,5.0));
 	player1.setUpPlayerCamera(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f));
 
+	enemy1.setUpEnemyObject(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(25.0,0.0,25.0));
+
+	objects.push_back(enemy1);
+
 	gamemode = 2;
 
 	//=====================================================================================
@@ -343,6 +351,10 @@ int _tmain(int argc, _TCHAR* argv[])
 					player1.setPosition(player1.playerCam.getPosition());
 				}
 			}
+
+			//CHASE
+			objects[objects.size()-1].chase(player1);
+			//objects[objects.size()-1].
 			render(); //render all the objects
 		}
 	
