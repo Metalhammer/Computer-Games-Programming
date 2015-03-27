@@ -18,5 +18,6 @@ public:
 	camera playerCam; // the camera that follows the player
 	void setCanJump(bool canJump);
 	bool getCanJump();
+	int health, score;
 };
 #endif

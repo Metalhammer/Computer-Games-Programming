@@ -128,19 +128,39 @@ void gameObject::setMinMax()
 	bb.setMin(min);
 }
 
-void gameObject::chase(gameObject player){
-	float xDif, zDif;
+bool gameObject::chase(gameObject player){
+	float xDif, zDif, hypDif, ratio, xVel, zVel;
 
 	xDif = this->getPosition().x - player.getPosition().x;
 	zDif = this->getPosition().z - player.getPosition().z;
 
-	if (xDif > 5) { this->setPosition(glm::vec3(this->getPosition().x - this->velocity, this->getPosition().y, this->getPosition().z)); }
+	hypDif = sqrtf((xDif*xDif)+(zDif*zDif));
+
+	ratio = this->velocity/hypDif;
+
+	xVel = ratio * xDif;
+	zVel = ratio * zDif;
+
+	if (hypDif > 5){
+		this->setPosition(glm::vec3(this->getPosition().x - xVel, this->getPosition().y, this->getPosition().z - zVel));
+	}
+
+	
+
+	/*if (xDif > 5) { this->setPosition(glm::vec3(this->getPosition().x - this->velocity, this->getPosition().y, this->getPosition().z)); }
 	if (xDif < -5) { this->setPosition(glm::vec3(this->getPosition().x + this->velocity, this->getPosition().y, this->getPosition().z)); }
 
 	if (zDif > 5) { this->setPosition(glm::vec3(this->getPosition().x, this->getPosition().y, this->getPosition().z - this->velocity)); }
-	if (zDif < -5) { this->setPosition(glm::vec3(this->getPosition().x, this->getPosition().y, this->getPosition().z + this->velocity)); }
+	if (zDif < -5) { this->setPosition(glm::vec3(this->getPosition().x, this->getPosition().y, this->getPosition().z + this->velocity)); }*/
 
 	transform = glm::translate(glm::mat4(1.0f), glm::vec3(this->getPosition()));
+
+	if (hypDif < 5){
+		//this->setPosition(glm::vec3(this->getPosition().x + xVel, this->getPosition().y, this->getPosition().z + zVel));
+		return false;
+	}
+
+	return true;
 
 	//createVAO(*Mesh);
 }

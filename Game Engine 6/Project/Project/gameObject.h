@@ -43,7 +43,7 @@ public:
 	glm::vec3 getPosition();
 	void setPosition(glm::vec3 position);
 
-	void chase(gameObject player);
+	bool chase(gameObject player);
 
 	boundingBox bb;
 

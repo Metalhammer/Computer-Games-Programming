@@ -22,15 +22,23 @@ resourceManager RM;
 GLFWwindow* window; // the render window
 glm::mat4 modelMatrix(1.0); //the model matrix used for rendering
 std::vector<gameObject> objects; //vector of objects in the game
+std::vector<enemy> enemies;
 //camera Cam1(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f)); //set up the camera
 bool loaded = false; //is the engine loaded
 collisions coll;
 moveable move;
 player player1;
-enemy enemy1;
+//enemy enemy1;
+
+float spawnTimer = 0;
+int enemiesSpawned = 1;
+
+
 
 //the current and old positions of the mouse
 double posX,posY,oldX,oldY;
+
+
 
 void input()
 {
@@ -138,6 +146,28 @@ void render()
 			objects[i].render(); //render the object
 			
 		}
+
+		for (int i=0; i<enemies.size();i++)
+		{
+			RM.getTexture(enemies[i].getTextureName()).useTexture(); //bind the texture for rendering
+			RM.getShader(enemies[i].getShaderName()).useProgram(); //ready the shader for rendering
+			modelMatrix = enemies[i].getTransformMatrix(); //set the model matrix for rendering
+
+			//set up the model, view and porjection matrix for use with the shader
+			GLuint modelMatrixID = gl::GetUniformLocation(RM.getShader(enemies[i].getShaderName()).getProgramID(), "mModel");
+			GLuint viewMatrixID = gl::GetUniformLocation(RM.getShader(enemies[i].getShaderName()).getProgramID(), "mView");
+			GLuint projectionMatrixID = gl::GetUniformLocation(RM.getShader(enemies[i].getShaderName()).getProgramID(), "mProjection");
+
+			gl::UniformMatrix4fv(modelMatrixID, 1, gl::FALSE_, &modelMatrix[0][0]);
+			gl::UniformMatrix4fv(viewMatrixID, 1, gl::FALSE_, &player1.playerCam.getViewMatrix()[0][0]);
+			gl::UniformMatrix4fv(projectionMatrixID, 1, gl::FALSE_, &player1.playerCam.getProjectionMatrix()[0][0]);
+
+			//================================================
+			//RENDER
+			//================================================
+			//enemy1.render();
+			enemies[i].render(); //render the object
+		}
 }
 
 void renderMenu()
@@ -164,6 +194,14 @@ void renderMenu()
 	objects[0].render();
 }
 
+void spawnEnemy(){
+	enemy newEnemy;
+
+	newEnemy.setUpEnemyObject(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(25.0,0.0,25.0));
+
+	enemies.push_back(newEnemy);
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 	//=====================================================================================
@@ -175,7 +213,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	exit( EXIT_FAILURE );
 
 	// Select OpenGL 4.3 with a forward compatible core profile.
-	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
+	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -209,7 +247,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//make the window blue
 	gl::ClearColor(0.0,0.5,1.0,1.0);
-	//dont render faces that cant be seen
+	//dont render faces that cant be seenenemy
 	gl::Enable(gl::CULL_FACE);
 
 	//enable depth testing
@@ -284,9 +322,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	player1.setUpPlayerObject(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(0.0,0.0,5.0));
 	player1.setUpPlayerCamera(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f));
 
-	enemy1.setUpEnemyObject(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(25.0,0.0,25.0));
+	//enemy1.setUpEnemyObject(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(25.0,0.0,25.0));
 
-	objects.push_back(enemy1);
+	//enemies.push_back(enemy1);
 
 	gamemode = 2;
 
@@ -328,7 +366,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			{
 				if (coll.checkCollision(player1,objects.at(i)) == true)
 				{
-					std::cout << "COLLISION XZ " << i << std::endl;
+					//std::cout << "COLLISION XZ " << i << std::endl;
 					player1.playerCam.setPosition(previousPosition);
 					
 				}
@@ -343,7 +381,7 @@ int _tmain(int argc, _TCHAR* argv[])
 				if (coll.checkCollision(player1,objects.at(i)) == true)
 				{
 					player1.setCanJump(true);
-					std::cout << "COLLISION Y " << i << std::endl;
+					//std::cout << "COLLISION Y " << i << std::endl;
 					float dif = objects.at(i).bb.getMax().y - player1.bb.getMin().y;
 					float height = (player1.bb.getMax().y - player1.bb.getMin().y)/2;
 					player1.playerCam.setPosition(glm::vec3(player1.playerCam.getPosition().x,previousPosition.y,player1.playerCam.getPosition().z));
@@ -352,8 +390,34 @@ int _tmain(int argc, _TCHAR* argv[])
 				}
 			}
 
+			/*for (int i = 0; i < enemies.size()-1; i++){
+				for (int j = i+1; j < enemies.size(); j++){
+					if (coll.checkCollision(enemies[i],enemies[j])){
+						std::cout << "AHHH IT'S TOUCHING ME!" << std::endl;
+					}
+				}
+			}*/
+
+
 			//CHASE
-			objects[objects.size()-1].chase(player1);
+			for (int i = 0; i < enemies.size(); i++){
+				if (enemies[i].chase(player1) == true){}
+				else {
+					enemies.erase(enemies.begin() + i);
+					i--;
+					player1.health -= 10;
+					std::cout << "player health: " << player1.health << std::endl;
+				}
+				//enemies[i].render();
+			}
+
+			spawnTimer = glfwGetTime();
+			if (spawnTimer >  + enemiesSpawned*5){
+				spawnEnemy();
+				enemiesSpawned++;
+			}
+
+			//objects[objects.size()-1].chase(player1);
 			//objects[objects.size()-1].
 			render(); //render all the objects
 		}
