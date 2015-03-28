@@ -33,12 +33,8 @@ player player1;
 float spawnTimer = 0;
 int enemiesSpawned = 1;
 
-
-
 //the current and old positions of the mouse
 double posX,posY,oldX,oldY;
-
-
 
 void input()
 {
@@ -123,21 +119,30 @@ void render()
 	gl::Clear(gl::DEPTH_BUFFER_BIT);
 	//clear color buffer before rendering
 	gl::Clear(gl::COLOR_BUFFER_BIT);
-	
-		for(int i=1; i<objects.size();i++)
+	RM.getShader(objects[1].getShaderName()).useProgram(); //ready the shader for rendering
+	GLuint modelMatrixID = gl::GetUniformLocation(RM.getShader(objects[1].getShaderName()).getProgramID(), "mModel");
+	GLuint viewMatrixID = gl::GetUniformLocation(RM.getShader(objects[1].getShaderName()).getProgramID(), "mView");
+	GLuint projectionMatrixID = gl::GetUniformLocation(RM.getShader(objects[1].getShaderName()).getProgramID(), "mProjection");
+	gl::UniformMatrix4fv(viewMatrixID, 1, gl::FALSE_, &player1.playerCam.getViewMatrix()[0][0]);
+	gl::UniformMatrix4fv(projectionMatrixID, 1, gl::FALSE_, &player1.playerCam.getProjectionMatrix()[0][0]);
+
+	gl::Disable(gl::DEPTH_TEST);
+	RM.getTexture(objects[1].getTextureName()).useTexture(); //bind the texture for rendering
+	modelMatrix = objects[1].getTransformMatrix(); //set the model matrix for rendering
+	gl::UniformMatrix4fv(modelMatrixID, 1, gl::FALSE_, &modelMatrix[0][0]);
+	objects[1].render(); //render the object
+	gl::Enable(gl::DEPTH_TEST);
+
+		for(int i=2; i<objects.size();i++)
 		{
 			RM.getTexture(objects[i].getTextureName()).useTexture(); //bind the texture for rendering
-			RM.getShader(objects[i].getShaderName()).useProgram(); //ready the shader for rendering
+			
 			modelMatrix = objects[i].getTransformMatrix(); //set the model matrix for rendering
 
 			//set up the model, view and porjection matrix for use with the shader
-			GLuint modelMatrixID = gl::GetUniformLocation(RM.getShader(objects[i].getShaderName()).getProgramID(), "mModel");
-			GLuint viewMatrixID = gl::GetUniformLocation(RM.getShader(objects[i].getShaderName()).getProgramID(), "mView");
-			GLuint projectionMatrixID = gl::GetUniformLocation(RM.getShader(objects[i].getShaderName()).getProgramID(), "mProjection");
 
 			gl::UniformMatrix4fv(modelMatrixID, 1, gl::FALSE_, &modelMatrix[0][0]);
-			gl::UniformMatrix4fv(viewMatrixID, 1, gl::FALSE_, &player1.playerCam.getViewMatrix()[0][0]);
-			gl::UniformMatrix4fv(projectionMatrixID, 1, gl::FALSE_, &player1.playerCam.getProjectionMatrix()[0][0]);
+			
 
 			//================================================
 			//RENDER
@@ -150,17 +155,9 @@ void render()
 		for (int i=0; i<enemies.size();i++)
 		{
 			RM.getTexture(enemies[i].getTextureName()).useTexture(); //bind the texture for rendering
-			RM.getShader(enemies[i].getShaderName()).useProgram(); //ready the shader for rendering
 			modelMatrix = enemies[i].getTransformMatrix(); //set the model matrix for rendering
 
-			//set up the model, view and porjection matrix for use with the shader
-			GLuint modelMatrixID = gl::GetUniformLocation(RM.getShader(enemies[i].getShaderName()).getProgramID(), "mModel");
-			GLuint viewMatrixID = gl::GetUniformLocation(RM.getShader(enemies[i].getShaderName()).getProgramID(), "mView");
-			GLuint projectionMatrixID = gl::GetUniformLocation(RM.getShader(enemies[i].getShaderName()).getProgramID(), "mProjection");
-
 			gl::UniformMatrix4fv(modelMatrixID, 1, gl::FALSE_, &modelMatrix[0][0]);
-			gl::UniformMatrix4fv(viewMatrixID, 1, gl::FALSE_, &player1.playerCam.getViewMatrix()[0][0]);
-			gl::UniformMatrix4fv(projectionMatrixID, 1, gl::FALSE_, &player1.playerCam.getProjectionMatrix()[0][0]);
 
 			//================================================
 			//RENDER
@@ -266,6 +263,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	RM.loadMesh("block.txt", "block"); //create a block
 	RM.loadMesh("Plane.txt", "plane"); //create a block
 	RM.loadMesh("window.txt", "window"); //create a block
+	RM.loadMesh("skybox.txt", "skybox"); //create a block
 
 	RM.loadShader("../shader/basic3.frag","../shader/basic3.vert", "shader"); //load a shader
 	RM.loadShader("../shader/basic5.frag","../shader/basic5.vert", "menuShader"); //load a shader
@@ -278,9 +276,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	RM.loadTexture("texture2.png"); //load a texture
 	RM.loadTexture("texture3.png"); //load a texture
 	RM.loadTexture("texture4.png"); //load a texture
+	RM.loadTexture("skybox_texture.jpg"); //load a texture
 
 	//create objects to use
 	gameObject plane(RM.getMesh("plane"), "grass.png", "shader", glm::vec3(0.0,-1.0,0.0));
+	gameObject skybox(RM.getMesh("skybox"), "skybox_texture.jpg", "shader", glm::vec3(0,0,0)); //set the skybox position
 	gameObject block1(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(0.0,-0.5,5.0));
 	gameObject block2(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(7.0,7.0,-5.0));
 	gameObject block3(RM.getMesh("block"), "texture3.png", "shader", glm::vec3(-7.0,14.0,-5.0));
@@ -291,6 +291,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	gameObject block8(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(-17.0,7.0,-5.0));
 	gameObject block9(RM.getMesh("block"), "face.png", "shader", glm::vec3(17.0,7.0,-5.0));
 	gameObject block10(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(-22.0,9.0,5.0));
+	
 
 	block1.scale(glm::vec3(20,1,5));
 	block2.scale(glm::vec3(5,16,5));
@@ -307,6 +308,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	gameObject splash(RM.getMesh("window"), "Splash.png", "menuShader", glm::vec3(0.0,0.0,-10.0));
 	
 	objects.push_back(menu);
+	objects.push_back(skybox);
 	objects.push_back(block1); //add the block to the objects vector for rendering
 	objects.push_back(block2); //add the block to the objects vector for rendering
 	objects.push_back(block3); //add the block to the objects vector for rendering
@@ -321,7 +323,6 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	player1.setUpPlayerObject(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(0.0,0.0,5.0));
 	player1.setUpPlayerCamera(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f));
-
 	//enemy1.setUpEnemyObject(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(25.0,0.0,25.0));
 
 	//enemies.push_back(enemy1);
@@ -331,7 +332,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	//=====================================================================================
 	//GAME LOOP
 	//=====================================================================================
-
+	float elapsedTime = glfwGetTime();
 	//while the renderwindow isnt closed, keep running through the loop
 	while(!glfwWindowShouldClose(window))
 	{
@@ -348,9 +349,9 @@ int _tmain(int argc, _TCHAR* argv[])
 			gamemode  = 3;
 			loaded  = true;
 		}
-		float elapsedTime = glfwGetTime();
+		
 
-		if(glfwGetTime()-elapsedTime > 1/60)
+		if(glfwGetTime()-elapsedTime > 0.016)
 		{
 		//=====================
 		// MAIN LOOP GOES HERE
@@ -362,7 +363,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		player1.setPosition(player1.playerCam.getPosition());
 		if(gamemode == 1)
 		{
-			for(int i = 1; i < objects.size(); i ++)
+			for(int i = 2; i < objects.size(); i ++)
 			{
 				if (coll.checkCollision(player1,objects.at(i)) == true)
 				{
@@ -376,7 +377,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			move.euler(&player1.playerCam);
 			player1.setPosition(player1.playerCam.getPosition());
 			
-			for(int i = 1; i < objects.size(); i ++)
+			for(int i = 2; i < objects.size(); i ++)
 			{
 				if (coll.checkCollision(player1,objects.at(i)) == true)
 				{
@@ -419,12 +420,13 @@ int _tmain(int argc, _TCHAR* argv[])
 
 			//objects[objects.size()-1].chase(player1);
 			//objects[objects.size()-1].
+			objects.at(1).setPosition(glm::vec3(player1.getPosition().x,player1.getPosition().y,player1.getPosition().z));
 			render(); //render all the objects
 		}
 	
 		if(gamemode == 3)
 		{
-			renderMenu(); //render all the objects
+			renderMenu(); //render the menu
 		}
 		
 		//get inputs

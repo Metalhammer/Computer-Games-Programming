@@ -173,4 +173,5 @@ glm::vec3 gameObject::getPosition()
 void gameObject::setPosition(glm::vec3 position)
 {
 	this->position = position;
+	transform = glm::translate(glm::mat4(1.0f), glm::vec3(position)); //set up the transform matrix
 }
