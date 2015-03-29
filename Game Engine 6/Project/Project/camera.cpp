@@ -132,6 +132,11 @@ glm::vec3 camera::getVelocity()
 	return velocity;
 }
 
+glm::vec3 camera::getForward()
+{
+	return forward;
+}
+
 void camera::rotate(float x, float y)
 {
 	pitch += y;

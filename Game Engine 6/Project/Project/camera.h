@@ -59,6 +59,7 @@ public:
 
 	glm::vec3 getPosition(); //return the position of the camera
 	glm::vec3 getVelocity();
+	glm::vec3 getForward();
 
 	void setFOV(float FOV);
 	void setNearPlane(float plane);

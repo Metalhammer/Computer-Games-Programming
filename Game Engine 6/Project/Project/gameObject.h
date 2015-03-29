@@ -26,6 +26,8 @@ protected:
 	
 	float velocity;
 
+	glm::vec3 vel;
+
 	void setMinMax(); //set the min and max bounding box points
 
 public:
@@ -41,7 +43,9 @@ public:
 	void scale(glm::vec3 scale); //scale the object
 
 	glm::vec3 getPosition();
+	glm::vec3 getVel();
 	void setPosition(glm::vec3 position);
+	void setVel(glm::vec3 velocity);
 
 	bool chase(gameObject player);
 

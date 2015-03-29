@@ -24,14 +24,18 @@ GLFWwindow* window; // the render window
 glm::mat4 modelMatrix(1.0); //the model matrix used for rendering
 std::vector<gameObject> objects; //vector of objects in the game
 std::vector<enemy> enemies;
+std::vector<gameObject> bullets;
 bool loaded = false; //is the engine loaded
+bool canShoot = true;
 collisions coll;
 moveable move;
 player player1;
 //enemy enemy1;
 std::vector<light> lights;
 float spawnTimer = 0;
+float startTime = 0;
 int enemiesSpawned = 1;
+float lastShot = 0;
 
 //the current and old positions of the mouse
 double posX,posY,oldX,oldY;
@@ -45,8 +49,19 @@ void input()
 
 	if(gamemode == 1) //if the game is playing, get input
 	{
-		//look around with the camea
+		//look around with the camera
 		player1.playerCam.look(moveX,moveY, 0.05f);
+
+		//Shoot
+		if (glfwGetMouseButton(window,GLFW_MOUSE_BUTTON_LEFT) && glfwGetTime()-1 > lastShot){
+			lastShot = glfwGetTime();
+			std::cout << "POW POW MO'FUCKA" << std::endl;
+			gameObject newBullet(RM.getMesh("block"), "texture1.png", "shader", player1.getPosition());
+			newBullet.scale(glm::vec3(1,1,1));
+			newBullet.setVel(player1.playerCam.getForward());
+			bullets.push_back(newBullet);
+			canShoot = false;
+		}
 
 		//move forwrds
 		if (glfwGetKey(window,GLFW_KEY_W)){
@@ -95,11 +110,12 @@ void input()
 	{
 		if (glfwGetMouseButton(window,GLFW_MOUSE_BUTTON_LEFT)){
 		double xpos, ypos; 
-		glfwGetCursorPos(window,&xpos,&ypos);//get the mosue input
+		glfwGetCursorPos(window,&xpos,&ypos);//get the mouse input
 
 		if(xpos >379 && xpos < 853 && ypos > 82 && ypos <268)
 		{
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+			startTime = glfwGetTime();
 			gamemode = 1;
 		}
 
@@ -118,6 +134,8 @@ void input()
 	oldX = posX;
 	oldY = posY;
 }
+
+
 
 void render()
 {
@@ -220,6 +238,20 @@ void render()
 			enemies[i].render(); //render the object
 		}
 
+		for (int i=0; i<bullets.size();i++)
+		{
+			RM.getTexture(bullets[i].getTextureName()).useTexture(); //bind the texture for rendering
+			modelMatrix = bullets[i].getTransformMatrix(); //set the model matrix for rendering
+
+			gl::UniformMatrix4fv(modelMatrixID, 1, gl::FALSE_, &modelMatrix[0][0]);
+
+			//================================================
+			//RENDER
+			//================================================
+			//enemy1.render();
+			bullets[i].render(); //render the object
+		}
+
 }
 
 void renderMenu()
@@ -249,9 +281,50 @@ void renderMenu()
 void spawnEnemy(){
 	enemy newEnemy;
 
-	newEnemy.setUpEnemyObject(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(25.0,0.0,25.0));
+	float x, z;
+	float xDif, zDif;
+	float dist = 0;
+
+
+	while(dist < 10){
+		
+		x = rand()%36 - 18;
+		z = rand()%36 - 18;
+
+		xDif = player1.getPosition().x - x;
+		zDif = player1.getPosition().z - z;
+
+		dist = sqrt((xDif*xDif)+(zDif*zDif));
+	}
+
+	newEnemy.setUpEnemyObject(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(x,0.0,z));
 
 	enemies.push_back(newEnemy);
+}
+
+void updateBullets(){
+	for (int i = 0; i < bullets.size(); i++)
+	{
+		bullets[i].setPosition(bullets[i].getPosition() + bullets[i].getVel());
+		for (int j = 0; j < enemies.size(); j++){
+			if (coll.checkCollision(bullets[i], enemies[j])){
+				bullets.erase(bullets.begin() + i);
+				enemies.erase(enemies.begin() + j);
+				j = enemies.size();
+				i--;
+				player1.score += 100;
+				std::cout << "Score: " << player1.score << std::endl;
+			}
+		}
+	}
+
+	for (int i = 0; i < bullets.size(); i++)
+	{
+		if (abs(bullets[i].getPosition().x) > 20 || bullets[i].getPosition().y < -10 || abs(bullets[i].getPosition().z > 20)){
+			bullets.erase(bullets.begin() + i);
+			i--;
+		}
+	}
 }
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -337,44 +410,59 @@ int _tmain(int argc, _TCHAR* argv[])
 	//create objects to use
 	gameObject plane(RM.getMesh("plane"), "grass.png", "shader", glm::vec3(0.0,-1.0,0.0));
 	gameObject skybox(RM.getMesh("skybox"), "skybox_texture.jpg", "skyboxShader", glm::vec3(0,0,0)); //set the skybox position
-	gameObject block1(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(0.0,-0.5,5.0));
-	gameObject block2(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(7.0,7.0,-5.0));
-	gameObject block3(RM.getMesh("block"), "texture3.png", "shader", glm::vec3(-7.0,14.0,-5.0));
-	gameObject block4(RM.getMesh("block"), "face.png", "shader", glm::vec3(9.5,9.0,-15.0));
-	gameObject block5(RM.getMesh("block"), "texture3.png", "shader", glm::vec3(-14.5,14.0,-25.0));
-	gameObject block6(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(-14.5,14.0,-37.0));
-	gameObject block7(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(7.5,9.0,-37.0));
-	gameObject block8(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(-17.0,7.0,-5.0));
-	gameObject block9(RM.getMesh("block"), "face.png", "shader", glm::vec3(17.0,7.0,-5.0));
-	gameObject block10(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(-22.0,9.0,5.0));
+	//gameObject block1(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(0.0,-0.5,5.0));
+	//gameObject block2(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(7.0,7.0,-5.0));
+	//gameObject block3(RM.getMesh("block"), "texture3.png", "shader", glm::vec3(-7.0,14.0,-5.0));
+	//gameObject block4(RM.getMesh("block"), "face.png", "shader", glm::vec3(9.5,9.0,-15.0));
+	//gameObject block5(RM.getMesh("block"), "texture3.png", "shader", glm::vec3(-14.5,14.0,-25.0));
+	//gameObject block6(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(-14.5,14.0,-37.0));
+	//gameObject block7(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(7.5,9.0,-37.0));
+	//gameObject block8(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(-17.0,7.0,-5.0));
+	//gameObject block9(RM.getMesh("block"), "face.png", "shader", glm::vec3(17.0,7.0,-5.0));
+	//gameObject block10(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(-22.0,9.0,5.0));
+
+	gameObject wall1(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(0.0,-5.0,20.0));
+	gameObject wall2(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(0.0,-5.0,-20.0));
+	gameObject wall3(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(20.0,-5.0,0.0));
+	gameObject wall4(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(-20.0,-5.0,0.0));
+
+	wall1.scale(glm::vec3(40,10,1));
+	wall2.scale(glm::vec3(40,10,1));
+	wall3.scale(glm::vec3(1,10,40));
+	wall4.scale(glm::vec3(1,10,40));
+	
 	
 
-	block1.scale(glm::vec3(20,1,5));
-	block2.scale(glm::vec3(5,16,5));
-	block3.scale(glm::vec3(5,30,5));
-	block4.scale(glm::vec3(10,20,10));
-	block5.scale(glm::vec3(20,30,10));
-	block6.scale(glm::vec3(20,30,10));
-	block7.scale(glm::vec3(20,20,10));
-	block8.scale(glm::vec3(10,16,5));
-	block9.scale(glm::vec3(10,16,5));
-	block10.scale(glm::vec3(20,20,5));
+	//block1.scale(glm::vec3(20,1,5));
+	//block2.scale(glm::vec3(5,16,5));
+	//block3.scale(glm::vec3(5,30,5));
+	//block4.scale(glm::vec3(10,20,10));
+	//block5.scale(glm::vec3(20,30,10));
+	//block6.scale(glm::vec3(20,30,10));
+	//block7.scale(glm::vec3(20,20,10));
+	//block8.scale(glm::vec3(10,16,5));
+	//block9.scale(glm::vec3(10,16,5));
+	//block10.scale(glm::vec3(20,20,5));
 
 	gameObject menu(RM.getMesh("window"), "Menu.png", "menuShader", glm::vec3(0.0,0.0,0.0));
 	gameObject splash(RM.getMesh("window"), "Splash.png", "menuShader", glm::vec3(0.0,0.0,-10.0));
 	
 	objects.push_back(menu);
 	objects.push_back(skybox);
-	objects.push_back(block1); //add the block to the objects vector for rendering
-	objects.push_back(block2); //add the block to the objects vector for rendering
-	objects.push_back(block3); //add the block to the objects vector for rendering
-	objects.push_back(block4); //add the block to the objects vector for rendering
-	objects.push_back(block5); //add the block to the objects vector for rendering
-	objects.push_back(block6); //add the block to the objects vector for rendering
-	objects.push_back(block7); //add the block to the objects vector for rendering
-	objects.push_back(block8); //add the block to the objects vector for rendering
-	objects.push_back(block9); //add the block to the objects vector for rendering
-	objects.push_back(block10); //add the player to the objects vector for rendering
+	//objects.push_back(block1); //add the block to the objects vector for rendering
+	//objects.push_back(block2); //add the block to the objects vector for rendering
+	//objects.push_back(block3); //add the block to the objects vector for rendering
+	//objects.push_back(block4); //add the block to the objects vector for rendering
+	//objects.push_back(block5); //add the block to the objects vector for rendering
+	//objects.push_back(block6); //add the block to the objects vector for rendering
+	//objects.push_back(block7); //add the block to the objects vector for rendering
+	//objects.push_back(block8); //add the block to the objects vector for rendering
+	//objects.push_back(block9); //add the block to the objects vector for rendering
+	//objects.push_back(block10); //add the player to the objects vector for rendering
+	objects.push_back(wall1);
+	objects.push_back(wall2);
+	objects.push_back(wall3);
+	objects.push_back(wall4);
 	objects.push_back(plane); //create a plane for the world
 
 	player1.setUpPlayerObject(RM.getMesh("block"), "texture4.png", "shader", glm::vec3(0.0,0.0,5.0));
@@ -382,6 +470,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	//enemy1.setUpEnemyObject(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(25.0,0.0,25.0));
 
 	//enemies.push_back(enemy1);
+
+	//*LIGHTS OUT*
 
 	light light1(glm::vec3(5,5,18), glm::vec3(0.3,0.3,0.3), glm::vec3(1.0,1.0,1.0), glm::vec3(1.0,1.0,1.0));
 	light light2(glm::vec3(5,5,18), glm::vec3(0.3,0.3,0.3), glm::vec3(1.0,1.0,1.0), glm::vec3(1.0,1.0,1.0));
@@ -410,8 +500,9 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		if(loaded == false && glfwGetTime() > 0)
 		{
-			gamemode  = 3;
+			gamemode = 3;
 			loaded  = true;
+			std::cout << "LOADED" << std::endl;
 		}
 		
 
@@ -476,8 +567,10 @@ int _tmain(int argc, _TCHAR* argv[])
 				//enemies[i].render();
 			}
 
+			updateBullets();
+
 			spawnTimer = glfwGetTime();
-			if (spawnTimer >  + enemiesSpawned*5){
+			if (spawnTimer - startTime >  enemiesSpawned*5){
 				spawnEnemy();
 				enemiesSpawned++;
 			}

@@ -12,6 +12,7 @@ gameObject::gameObject(mesh Mesh, std::string textureName, std::string shaderNam
 	this->textureName = textureName; //set the name of the objects texture
 	this->shaderName = shaderName; //set the name of the objects shader
 	this->position = Position; //set the current position of the object within the world
+	this->vel = glm::vec3(0,0,0);
 	transform = glm::translate(glm::mat4(1.0f), glm::vec3(position)); //set up the transform matrix
 	createVAO(Mesh); //create the vao for the object when it is created
 	setMinMax();
@@ -23,6 +24,7 @@ gameObject::gameObject(mesh Mesh, glm::vec3 color, std::string shaderName, glm::
 	this->color = color; //set the name of the objects texture
 	this->shaderName = shaderName; //set the name of the objects shader
 	this->position = Position; //set the current position of the object within the world
+	this->vel = glm::vec3(0,0,0);
 	transform = glm::translate(glm::mat4(1.0f), glm::vec3(position)); //set up the transform matrix
 	createVAO(Mesh); //create the vao for the object when it is created
 	setMinMax();
@@ -170,8 +172,17 @@ glm::vec3 gameObject::getPosition()
 	return position;
 }
 
+glm::vec3 gameObject::getVel()
+{
+	return vel;
+}
+
 void gameObject::setPosition(glm::vec3 position)
 {
 	this->position = position;
 	transform = glm::translate(glm::mat4(1.0f), glm::vec3(position)); //set up the transform matrix
+}
+
+void gameObject::setVel(glm::vec3 velocity){
+	this->vel = velocity;
 }
