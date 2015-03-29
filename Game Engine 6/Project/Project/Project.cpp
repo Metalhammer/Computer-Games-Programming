@@ -16,6 +16,7 @@
 #include "moveable.h"
 #include "player.h"
 #include "enemy.h"
+#include "light.h"
 
 float gamemode;
 resourceManager RM;
@@ -23,13 +24,12 @@ GLFWwindow* window; // the render window
 glm::mat4 modelMatrix(1.0); //the model matrix used for rendering
 std::vector<gameObject> objects; //vector of objects in the game
 std::vector<enemy> enemies;
-//camera Cam1(70.0f,0.1f,500.0f,16.0f/9.0f,glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f)); //set up the camera
 bool loaded = false; //is the engine loaded
 collisions coll;
 moveable move;
 player player1;
 //enemy enemy1;
-
+std::vector<light> lights;
 float spawnTimer = 0;
 int enemiesSpawned = 1;
 
@@ -66,6 +66,12 @@ void input()
 		//move right
 		if (glfwGetKey(window,GLFW_KEY_D)){
 				player1.playerCam.strafeRight(0.05);} //move right when D is pressed
+
+		if (glfwGetKey(window,GLFW_KEY_F)){
+			std::cout << "X: " << player1.getPosition().x <<
+				"\nY: " << player1.getPosition().y << 
+				"\nZ: " << player1.getPosition().z << std::endl;;} //move right when D is pressed
+
 
 		if (glfwGetKey(window,GLFW_KEY_SPACE)){
 			if (player1.getCanJump() == true){
@@ -119,10 +125,13 @@ void render()
 	gl::Clear(gl::DEPTH_BUFFER_BIT);
 	//clear color buffer before rendering
 	gl::Clear(gl::COLOR_BUFFER_BIT);
+
 	RM.getShader(objects[1].getShaderName()).useProgram(); //ready the shader for rendering
+
 	GLuint modelMatrixID = gl::GetUniformLocation(RM.getShader(objects[1].getShaderName()).getProgramID(), "mModel");
 	GLuint viewMatrixID = gl::GetUniformLocation(RM.getShader(objects[1].getShaderName()).getProgramID(), "mView");
 	GLuint projectionMatrixID = gl::GetUniformLocation(RM.getShader(objects[1].getShaderName()).getProgramID(), "mProjection");
+
 	gl::UniformMatrix4fv(viewMatrixID, 1, gl::FALSE_, &player1.playerCam.getViewMatrix()[0][0]);
 	gl::UniformMatrix4fv(projectionMatrixID, 1, gl::FALSE_, &player1.playerCam.getProjectionMatrix()[0][0]);
 
@@ -131,6 +140,51 @@ void render()
 	modelMatrix = objects[1].getTransformMatrix(); //set the model matrix for rendering
 	gl::UniformMatrix4fv(modelMatrixID, 1, gl::FALSE_, &modelMatrix[0][0]);
 	objects[1].render(); //render the object
+	gl::Enable(gl::DEPTH_TEST);
+
+
+	RM.getShader(objects[2].getShaderName()).useProgram(); //ready the shader for rendering
+
+	GLuint light = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "lightPosition");
+	gl::Uniform3f(light,5,5,18);
+
+	GLuint AmbientReflectivity = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "AmbientReflectivity");
+	gl::Uniform3f(AmbientReflectivity,0.5,0.5,0.5);
+
+	GLuint DiffuseReflectivity = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "DiffuseReflectivity");
+	gl::Uniform3f(DiffuseReflectivity,0.7,0.7,0.7);
+
+	GLuint SpecularReflectivity = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "SpecularReflectivity");
+	gl::Uniform3f(SpecularReflectivity,3.0,3.0,3.0);
+
+	GLuint AmbientIntensity = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "AmbientIntensity");
+	gl::Uniform3f(AmbientIntensity,0.3,0.3,0.3);
+
+	GLuint DiffuseIntensity = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "DiffuseIntensity");
+	gl::Uniform3f(DiffuseIntensity,1.0,1.0,1.0);
+
+	GLuint SpecularIntensity = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "SpecularIntensity");
+	gl::Uniform3f(SpecularIntensity,1.0,1.0,1.0);
+
+	GLuint SpecularExponent = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "SpecularExponent");
+	gl::Uniform1f(SpecularExponent,64);
+
+	GLuint normalMatrixID = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "mNormal");
+	 modelMatrixID = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "mModel");
+	 viewMatrixID = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "mView");
+	 projectionMatrixID = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "mProjection");
+
+	glm::mat4 mv = player1.playerCam.getViewMatrix() * modelMatrix;
+	glm::mat3 normalMatrix = glm::mat3( glm::vec3(mv[0]) , glm::vec3(mv[1]), glm::vec3(mv[2]));
+	gl::UniformMatrix3fv(normalMatrixID, 1, gl::FALSE_, &normalMatrix[0][0]);
+	gl::UniformMatrix4fv(viewMatrixID, 1, gl::FALSE_, &player1.playerCam.getViewMatrix()[0][0]);
+	gl::UniformMatrix4fv(projectionMatrixID, 1, gl::FALSE_, &player1.playerCam.getProjectionMatrix()[0][0]);
+
+	gl::Disable(gl::DEPTH_TEST);
+	RM.getTexture(objects[2].getTextureName()).useTexture(); //bind the texture for rendering
+	modelMatrix = objects[2].getTransformMatrix(); //set the model matrix for rendering
+	gl::UniformMatrix4fv(modelMatrixID, 1, gl::FALSE_, &modelMatrix[0][0]);
+	objects[2].render(); //render the object
 	gl::Enable(gl::DEPTH_TEST);
 
 		for(int i=2; i<objects.size();i++)
@@ -165,6 +219,7 @@ void render()
 			//enemy1.render();
 			enemies[i].render(); //render the object
 		}
+
 }
 
 void renderMenu()
@@ -265,7 +320,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	RM.loadMesh("window.txt", "window"); //create a block
 	RM.loadMesh("skybox.txt", "skybox"); //create a block
 
-	RM.loadShader("../shader/basic3.frag","../shader/basic3.vert", "shader"); //load a shader
+	RM.loadShader("../shader/basic3.frag","../shader/basic3.vert", "skyboxShader"); //load a shader
+	RM.loadShader("../shader/basic4.frag","../shader/basic4.vert", "shader"); //load a shader
 	RM.loadShader("../shader/basic5.frag","../shader/basic5.vert", "menuShader"); //load a shader
 
 	RM.loadTexture("face.png"); //load a texture
@@ -280,7 +336,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//create objects to use
 	gameObject plane(RM.getMesh("plane"), "grass.png", "shader", glm::vec3(0.0,-1.0,0.0));
-	gameObject skybox(RM.getMesh("skybox"), "skybox_texture.jpg", "shader", glm::vec3(0,0,0)); //set the skybox position
+	gameObject skybox(RM.getMesh("skybox"), "skybox_texture.jpg", "skyboxShader", glm::vec3(0,0,0)); //set the skybox position
 	gameObject block1(RM.getMesh("block"), "texture1.png", "shader", glm::vec3(0.0,-0.5,5.0));
 	gameObject block2(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(7.0,7.0,-5.0));
 	gameObject block3(RM.getMesh("block"), "texture3.png", "shader", glm::vec3(-7.0,14.0,-5.0));
@@ -326,6 +382,14 @@ int _tmain(int argc, _TCHAR* argv[])
 	//enemy1.setUpEnemyObject(RM.getMesh("block"), "texture2.png", "shader", glm::vec3(25.0,0.0,25.0));
 
 	//enemies.push_back(enemy1);
+
+	light light1(glm::vec3(5,5,18), glm::vec3(0.3,0.3,0.3), glm::vec3(1.0,1.0,1.0), glm::vec3(1.0,1.0,1.0));
+	light light2(glm::vec3(5,5,18), glm::vec3(0.3,0.3,0.3), glm::vec3(1.0,1.0,1.0), glm::vec3(1.0,1.0,1.0));
+	light light3(glm::vec3(5,5,18), glm::vec3(0.3,0.3,0.3), glm::vec3(1.0,1.0,1.0), glm::vec3(1.0,1.0,1.0));
+
+	lights.push_back(light1);
+	lights.push_back(light2);
+	lights.push_back(light3);
 
 	gamemode = 2;
 

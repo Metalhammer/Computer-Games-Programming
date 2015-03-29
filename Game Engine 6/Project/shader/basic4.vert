@@ -1,25 +1,29 @@
 #version 330
 
 layout (location=0) in vec3 VertexPosition;
-layout (location=1) in vec2 fragTexCoord;
+layout (location=1) in vec2 VertexTexture;
 layout (location=2) in vec3 VertexNormal;
 
+uniform vec3 lightPosition;
 uniform mat4 mModel;
 uniform mat4 mView;         
-uniform mat4 mProjection;
-uniform vec3 LightPosition; // Light position 
-uniform mat3 NormalMatrix;
+uniform mat4 mProjection;   
+uniform mat3 mNormal;
 
-out vec2 texCoord;
-out vec3 vertPos; //Vertex position in eye coords
-out vec3 N; //Transformed normal
-out vec3 lightPos; //Light position in eye coords
+out vec2 TextureCoordinates;
+
+out vec3 CamSpaceVertexPosition;
+out vec3 CamSpaceLightPosition;
+out vec3 CamSpaceVertexNormal;
+out vec3 ViewDirectionVector;
 
 void main()
 {
-	vertPos = vec3(mView * mModel * vec4(VertexPosition,1.0));
-	lightPos = vec3(mView * mModel * vec4(LightPosition,1.0)); 
-	N = normalize( NormalMatrix * VertexNormal);
-	texCoord = fragTexCoord * vec2(1.0, -1.0);
-	gl_Position = mProjection * mView * mModel * vec4(VertexPosition,1.0);
+CamSpaceVertexPosition = vec3(mView * mModel * vec4(VertexPosition,1.0));
+CamSpaceLightPosition = vec3(mView * mModel * vec4(lightPosition,1.0));
+CamSpaceVertexNormal = normalize(mNormal * VertexNormal);
+TextureCoordinates = VertexTexture * vec2(1.0, -1.0);
+ViewDirectionVector = vec3(-CamSpaceVertexPosition);
+vec4 vertPosition = vec4(VertexPosition,1.0);
+gl_Position = mProjection * mView * mModel * vertPosition;
 }
