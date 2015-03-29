@@ -135,8 +135,6 @@ void input()
 	oldY = posY;
 }
 
-
-
 void render()
 {
 	//clear depth buffer before rendering
@@ -163,9 +161,11 @@ void render()
 
 	RM.getShader(objects[2].getShaderName()).useProgram(); //ready the shader for rendering
 
+	//the position of the light
 	GLuint light = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "lightPosition");
-	gl::Uniform3f(light,5,5,18);
+	gl::Uniform3f(light,0,10,0);
 
+	//the reflectivity of the objects
 	GLuint AmbientReflectivity = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "AmbientReflectivity");
 	gl::Uniform3f(AmbientReflectivity,0.5,0.5,0.5);
 
@@ -175,11 +175,12 @@ void render()
 	GLuint SpecularReflectivity = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "SpecularReflectivity");
 	gl::Uniform3f(SpecularReflectivity,3.0,3.0,3.0);
 
+	//the intensity of the light
 	GLuint AmbientIntensity = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "AmbientIntensity");
 	gl::Uniform3f(AmbientIntensity,0.3,0.3,0.3);
 
 	GLuint DiffuseIntensity = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "DiffuseIntensity");
-	gl::Uniform3f(DiffuseIntensity,1.0,1.0,1.0);
+	gl::Uniform3f(DiffuseIntensity,3.0,3.0,3.0);
 
 	GLuint SpecularIntensity = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "SpecularIntensity");
 	gl::Uniform3f(SpecularIntensity,1.0,1.0,1.0);
@@ -187,6 +188,7 @@ void render()
 	GLuint SpecularExponent = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "SpecularExponent");
 	gl::Uniform1f(SpecularExponent,64);
 
+	
 	GLuint normalMatrixID = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "mNormal");
 	 modelMatrixID = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "mModel");
 	 viewMatrixID = gl::GetUniformLocation(RM.getShader(objects[2].getShaderName()).getProgramID(), "mView");
@@ -570,7 +572,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			updateBullets();
 
 			spawnTimer = glfwGetTime();
-			if (spawnTimer - startTime >  enemiesSpawned*5){
+			if (spawnTimer - startTime >  enemiesSpawned*2){
 				spawnEnemy();
 				enemiesSpawned++;
 			}
